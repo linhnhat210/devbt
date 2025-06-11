@@ -34,8 +34,13 @@ jobs:
           extensions: mbstring, bcmath, pdo, pdo_mysql
           coverage: none
 
-      - name: Copy .env
+          - name: Copy .env
         run: cp .env.example .env
+
+      - name: Set up in-memory SQLite for testing
+        run: |
+          echo "DB_CONNECTION=sqlite" >> .env
+          echo "DB_DATABASE=:memory:" >> .env
 
       - name: Install dependencies
         run: composer install --no-progress --no-interaction --prefer-dist
@@ -51,3 +56,4 @@ jobs:
 
       - name: Run tests
         run: php artisan test
+
