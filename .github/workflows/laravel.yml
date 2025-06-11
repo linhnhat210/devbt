@@ -34,7 +34,7 @@ jobs:
           extensions: mbstring, bcmath, pdo, pdo_mysql
           coverage: none
 
-          - name: Copy .env
+      - name: Copy .env
         run: cp .env.example .env
 
       - name: Set up in-memory SQLite for testing
@@ -56,4 +56,3 @@ jobs:
 
       - name: Run tests
         run: php artisan test
-
