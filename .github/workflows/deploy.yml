@@ -14,10 +14,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup SSH
-        uses: webfactory/ssh-agent@v0.9.0
+      - name: Setup SSH keys
+        uses: shimataro/ssh-key-action@v2
         with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          known_hosts: |
+            github.com
+            16.176.62.144
 
       - name: Deploy to EC2
         run: |
@@ -31,4 +34,3 @@ jobs:
             php artisan view:cache
             sudo systemctl reload nginx
           EOF
-
