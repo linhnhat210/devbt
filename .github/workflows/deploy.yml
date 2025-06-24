@@ -14,19 +14,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup SSH keys
-        uses: shimataro/ssh-key-action@v2
+      - name: Deploy to EC2 via appleboy/ssh-action
+        uses: appleboy/ssh-action@v1.0.3
         with:
+          host: 16.176.62.144
+          username: ec2-user
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          known_hosts: |
-            github.com
-
-      - name: Add EC2 to known_hosts
-        run: ssh-keyscan -H 16.176.62.144 >> ~/.ssh/known_hosts
-
-      - name: Deploy to EC2
-        run: |
-          ssh ec2-user@16.176.62.144 << 'EOF'
+          port: 22
+          script: |
             cd /var/www/devbt
             git pull origin main
             composer install --no-dev --optimize-autoloader
@@ -35,4 +30,3 @@ jobs:
             php artisan route:cache
             php artisan view:cache
             sudo systemctl reload nginx
-          EOF
