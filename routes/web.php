@@ -14,7 +14,7 @@ use App\Http\Controllers\WarehouseController;
 use App\Http\Controllers\Auth\LoginController;
 
 Route::get('/', function () {
-    return "Xin chào cthế giớ12356789123423432";
+    return "Xin c89123423432";
 })->name('home');
 
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login')->middleware('guest');
