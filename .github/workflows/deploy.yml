@@ -20,11 +20,13 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           known_hosts: |
             github.com
-            16.176.62.144
+
+      - name: Add EC2 to known_hosts
+        run: ssh-keyscan -H 16.176.62.144 >> ~/.ssh/known_hosts
 
       - name: Deploy to EC2
         run: |
-          ssh -o StrictHostKeyChecking=no ec2-user@16.176.62.144 << 'EOF'
+          ssh ec2-user@16.176.62.144 << 'EOF'
             cd /var/www/devbt
             git pull origin main
             composer install --no-dev --optimize-autoloader
