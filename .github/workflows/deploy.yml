@@ -17,15 +17,29 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
+      - name: Verify SSH connection
+        run: |
+          ssh -o StrictHostKeyChecking=no -v ec2-user@16.176.62.144 whoami
+        continue-on-error: true
+
       - name: Deploy to EC2
         run: |
           ssh -o StrictHostKeyChecking=no ec2-user@16.176.62.144 << 'EOF'
+            set -e
+            echo "Navigating to project directory"
             cd /var/www/devbt
+            echo "Pulling latest code from main branch"
             git pull origin main
+            echo "Installing Composer dependencies"
             composer install --no-dev --optimize-autoloader
+            echo "Running database migrations"
             php artisan migrate --force
+            echo "Caching configuration"
             php artisan config:cache
+            echo "Caching routes"
             php artisan route:cache
+            echo "Caching views"
             php artisan view:cache
+            echo "Reloading Nginx"
             sudo systemctl reload nginx
           EOF
