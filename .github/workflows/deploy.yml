@@ -1,10 +1,8 @@
-name: Deploy Laravel to EC2 Amazon Linux 2023
+name: Deploy Laravel to EC2
 
 on:
   push:
-    branches:
-      - main
-      - dev
+    branches: [main]
 
 jobs:
   deploy:
@@ -14,14 +12,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Deploy to EC2 via appleboy/ssh-action
-        uses: appleboy/ssh-action@v1.0.3
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.9.0
         with:
-          host: 16.176.62.144
-          username: ec2-user
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: 22
-          script: |
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Deploy to EC2
+        run: |
+          ssh -o StrictHostKeyChecking=no ec2-user@16.176.62.144 << 'EOF'
             cd /var/www/devbt
             git pull origin main
             composer install --no-dev --optimize-autoloader
@@ -30,3 +28,4 @@ jobs:
             php artisan route:cache
             php artisan view:cache
             sudo systemctl reload nginx
+          EOF
