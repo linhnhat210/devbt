@@ -1,8 +1,10 @@
-name: Deploy Laravel to EC2
+name: Deploy Laravel to EC2 Amazon Linux 2023
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
+      - dev
 
 jobs:
   deploy:
@@ -12,48 +14,19 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup SSH
-        uses: webfactory/ssh-agent@v0.9.0
+      - name: Deploy to EC2 via appleboy/ssh-action
+        uses: appleboy/ssh-action@v1.0.3
         with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-
-      - name: Verify SSH connection
-        run: |
-          ssh -o StrictHostKeyChecking=no -v ec2-user@16.176.62.144 whoami
-        continue-on-error: true
-
-      - name: Configure SSH for Git on EC2
-        run: |
-          ssh -o StrictHostKeyChecking=no ec2-user@16.176.62.144 << 'EOF'
-            mkdir -p ~/.ssh
-            echo "${{ secrets.GIT_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-            chmod 600 ~/.ssh/id_rsa
-            ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts
-            chmod 600 ~/.ssh/known_hosts
-            echo "Verifying Git SSH connection"
-            ssh -T git@github.com || true
-          EOF
-
-      - name: Deploy to EC2
-        run: |
-          ssh -o StrictHostKeyChecking=no ec2-user@16.176.62.144 << 'EOF'
-            set -e
-            echo "Navigating to project directory"
+          host: 16.176.62.144
+          username: ec2-user
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: 22
+          script: |
             cd /var/www/devbt
-            echo "Resetting local changes"
-            git checkout -- .
-            echo "Pulling latest code from main branch"
             git pull origin main
-            echo "Installing Composer dependencies"
             composer install --no-dev --optimize-autoloader
-            echo "Running database migrations"
             php artisan migrate --force
-            echo "Caching configuration"
             php artisan config:cache
-            echo "Caching routes"
             php artisan route:cache
-            echo "Caching views"
             php artisan view:cache
-            echo "Reloading Nginx"
             sudo systemctl reload nginx
-          EOF
