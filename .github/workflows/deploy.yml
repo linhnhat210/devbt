@@ -40,6 +40,8 @@ jobs:
             set -e
             echo "Navigating to project directory"
             cd /var/www/devbt
+            echo "Resetting local changes"
+            git checkout -- .
             echo "Pulling latest code from main branch"
             git pull origin main
             echo "Installing Composer dependencies"
