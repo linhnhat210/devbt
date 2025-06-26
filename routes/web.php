@@ -14,7 +14,7 @@ use App\Http\Controllers\WarehouseController;
 use App\Http\Controllers\Auth\LoginController;
 
 Route::get('/', function () {
-    return "Xin la xin vinh biet";
+    return "Demo git acction";
 })->name('home');
 
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login')->middleware('guest');
