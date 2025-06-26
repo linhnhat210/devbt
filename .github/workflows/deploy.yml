@@ -22,6 +22,18 @@ jobs:
           ssh -o StrictHostKeyChecking=no -v ec2-user@16.176.62.144 whoami
         continue-on-error: true
 
+      - name: Configure SSH for Git on EC2
+        run: |
+          ssh -o StrictHostKeyChecking=no ec2-user@16.176.62.144 << 'EOF'
+            mkdir -p ~/.ssh
+            echo "${{ secrets.GIT_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+            chmod 600 ~/.ssh/id_rsa
+            ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts
+            chmod 600 ~/.ssh/known_hosts
+            echo "Verifying Git SSH connection"
+            ssh -T git@github.com || true
+          EOF
+
       - name: Deploy to EC2
         run: |
           ssh -o StrictHostKeyChecking=no ec2-user@16.176.62.144 << 'EOF'
